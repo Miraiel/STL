@@ -33,13 +33,14 @@ void main()
 	std::vector<int> vec = { 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89 };
 	for (int i = 0; i < vec.size(); i++)
 	{
-		cout << vec[i] << tab;
+		//cout << vec[i] << tab;
+		cout << vec.at(i);
 	}
 	cout << endl;
 	vector_properties(vec);
 	vec.push_back(134);
 	//vec.reserve(25);
-	vec.resize(17);
+	//vec.resize(17);
 	for (std::vector<int>::iterator it = vec.begin(); it != vec.end(); ++it)
 	{
 		cout << *it << tab;
@@ -47,6 +48,7 @@ void main()
 	cout << endl;
 	vec.insert(vec.begin(), 200);
 	vec.insert(vec.begin() + 5, 400);
+	vec.insert(vec.begin() + 3, { 1024, 2048, 3072, 4096 });
 
 	for (std::vector<int>::reverse_iterator it = vec.rbegin(); it != vec.rend(); ++it)
 	{
@@ -63,7 +65,7 @@ void main()
 		cout << vec[i] << tab;
 	}
 	cout << endl;
-	vector_properties(vec);
+	vector_properties(vec); 
 
 	cout << delimiter << endl;
 
