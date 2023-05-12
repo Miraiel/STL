@@ -1,9 +1,11 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include<iostream>
+#include<fstream>
 #include<map>
 #include<list>
 #include<time.h>
 #include<string>
+#include<Windows.h>
 
 using namespace std;
 
@@ -54,6 +56,12 @@ public:
 	{
 		//time_t t_time = mktime(&time);
 		return asctime(&time);
+	}
+
+	time_t get_timestamp()const
+	{
+		struct tm time = this->time;
+		return mktime(&time);
 	}
 
 	void set_width()
@@ -141,18 +149,76 @@ void print(const std::map<std::string, std::list<Crime>>& base)
 	}
 }
 
+void print_number(const std::map<std::string, std::list<Crime>>& base)
+{
+	std::string licence_plate;
+	cout << "Введите номер автомобиля: "; cin >> licence_plate;
+	try
+	{
+		for (std::list<Crime>::const_iterator it = base.at(licence_plate).begin(); it != base.at(licence_plate).end(); ++it)
+		{
+			cout << "\t" << *it << endl;
+		}
+	}
+	catch (const std::exception&)
+	{
+		std::cerr << "Номера нет в базе" << endl;
+	}
+	cout << endl;
+}
+
+void print_range(const std::map<std::string, std::list<Crime>>& base)
+{
+	std::string start_plate;
+	std::string end_plate;
+	cout << "Введите начальный номер диапазона: "; cin >> start_plate;
+	cout << "Введите конечный номер диапазона: "; cin >> end_plate;
+	for (std::map<std::string, std::list<Crime>>::const_iterator it = base.lower_bound(start_plate); it != base.upper_bound(end_plate); ++it)
+	{
+		cout << it->first << ":\n";
+		for (std::list<Crime>::const_iterator c_it = it->second.begin(); c_it != it->second.end(); ++it)
+		{
+			cout << "\t" << *c_it << endl;
+		}
+		cout << delimetr << endl;
+	}
+}
+
 void add_crime(std::map<std::string, std::list<Crime>>& base)
 {
 	for (std::pair<int, std::string> i : crime)cout << i.first << "\t" << i.second << endl;
 	int id;								//статья
 	std::string licence_plate;			//номер автомобиля
-	std::string place;				//место нарушения
+	std::string place;					//место нарушения
 	int min, hour, day, month, year;	//дата и время нарушения
 	cout << "Введите номер статьи: "; cin >> id;
 	cout << "Введите номер автомобиля: "; cin >> licence_plate; cin.ignore();
 	cout << "Введите место нарушения: "; std::getline(cin, place);
+	SetConsoleCP(1251);
+	std::getline(cin, place);
+	SetConsoleCP(866);
 	cout << "Введите дату и время нарушения: "; cin >> year >> month >> day >> hour >> min;
 	base[licence_plate].push_back(Crime(id, place, min, hour, day, month, year));
+}
+
+void save(const std::map<std::string, std::list<Crime>>& base, const std::string& filename)
+{
+	std::ofstream fout(filename);
+	for (std::map<std::string, std::list<Crime>>::const_iterator it = base.begin(); it != base.end(); ++it)
+	{
+		fout << it->first << ":\t";
+		for (std::list<Crime>::const_iterator c_it = it->second.begin(); c_it != it->second.end(); ++c_it)
+		{
+			fout << c_it->get_id() << " " << c_it->get_timestamp() << " ";
+			//fout.seekp(-3, ios::cur);
+			fout << " " << c_it->get_place() << ", ";
+		}
+		fout << endl;
+	}
+	fout.close();
+	std::string command = "notepad ";
+	command += filename;
+	system(command.c_str());
 }
 
 //#define CRIME_CHECK
@@ -207,12 +273,18 @@ void main()
 		cout << "2. Сохранить базу в файл;" << endl;
 		cout << "3. Загрузить базу из файла;" << endl;
 		cout << "4. Добавить нарушение;" << endl;
+		cout << "5. Вывести все нарушения заданного номера;" << endl;
+		cout << "6. Вывести все нарушения по диапозону номеров;" << endl;
+		cout << "0. Выход" << endl;
 		cin >> key;
 		system("CLS");
 		switch (key)
 		{
 		case 1: print(base); break;
+		case 2: save(base, "base.txt"); break;
 		case 4: add_crime(base); break;
+		case 5: print_number(base); break;
+		case 6: print_range(base); break;
 		}
 		system("PAUSE");
 		system("CLS");

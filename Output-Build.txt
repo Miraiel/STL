@@ -1,0 +1,8 @@
+﻿Build started...
+1>------ Build started: Project: Police, Configuration: Debug x64 ------
+1>main.cpp
+1>C:\Users\Марина\source\repos\Miraiel\STL\Police\main.cpp(63,1): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+1>C:\Users\Марина\source\repos\Miraiel\STL\Police\main.cpp(162,1): warning C4326: return type of 'main' should be 'int' instead of 'void'
+1>LINK : fatal error LNK1168: cannot open C:\Users\Марина\source\repos\Miraiel\STL\x64\Debug\Police.exe for writing
+1>Done building project "Police.vcxproj" -- FAILED.
+========== Build: 0 succeeded, 1 failed, 0 up-to-date, 0 skipped ==========
