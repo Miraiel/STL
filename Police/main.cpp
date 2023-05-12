@@ -3,6 +3,7 @@
 #include<map>
 #include<list>
 #include<time.h>
+#include<string>
 
 using namespace std;
 
@@ -126,6 +127,34 @@ std::ostream& operator<<(std::ostream& os, const Crime& obj)
 	return os;
 }
 
+void print(const std::map<std::string, std::list<Crime>>& base)
+{
+	for (std::map<std::string, std::list<Crime>>::const_iterator it = base.begin(); it != base.end(); ++it)
+	{
+		cout << it->first << ":\n";
+
+		for (std::list<Crime>::const_iterator c_it = it->second.begin(); c_it != it->second.end(); ++c_it)
+		{
+			cout << "\t" << *c_it << endl;
+		}
+		cout << delimetr << endl;
+	}
+}
+
+void add_crime(std::map<std::string, std::list<Crime>>& base)
+{
+	for (std::pair<int, std::string> i : crime)cout << i.first << "\t" << i.second << endl;
+	int id;								//статья
+	std::string licence_plate;			//номер автомобиля
+	std::string place;				//место нарушения
+	int min, hour, day, month, year;	//дата и время нарушения
+	cout << "Введите номер статьи: "; cin >> id;
+	cout << "Введите номер автомобиля: "; cin >> licence_plate; cin.ignore();
+	cout << "Введите место нарушения: "; std::getline(cin, place);
+	cout << "Введите дату и время нарушения: "; cin >> year >> month >> day >> hour >> min;
+	base[licence_plate].push_back(Crime(id, place, min, hour, day, month, year));
+}
+
 //#define CRIME_CHECK
 //#define TIME_CHECK
 
@@ -170,17 +199,28 @@ void main()
 		}
 	};
 
-	for (std::map<std::string, std::list<Crime>>::iterator it = base.begin(); it != base.end(); ++it)
+	int key;
+	do
 	{
-		cout << it->first << ":\n";
-
-		for (std::list<Crime>::iterator c_it = it->second.begin(); c_it != it->second.end(); ++c_it)
+		cout << "Выберете действие:\n";
+		cout << "1. Вывести базу на экран;" << endl;
+		cout << "2. Сохранить базу в файл;" << endl;
+		cout << "3. Загрузить базу из файла;" << endl;
+		cout << "4. Добавить нарушение;" << endl;
+		cin >> key;
+		system("CLS");
+		switch (key)
 		{
-			cout << "\t" << *c_it << endl;
+		case 1: print(base); break;
+		case 4: add_crime(base); break;
 		}
-		cout << delimetr << endl;
-	}
+		system("PAUSE");
+		system("CLS");
+	} while (key);
+
 }
+
+
 
 
 
