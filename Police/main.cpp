@@ -78,7 +78,7 @@ public:
 		this->id = id;
 	}
 
-	void set_plase(std::string place)
+	void set_place(std::string place)
 	{
 		this->place = place;
 	}
@@ -105,19 +105,39 @@ public:
 		time = *new_time;
 	}
 
+	void set_time(time_t time)
+	{
+		tm* p_time = localtime(&time);
+		this->time = *p_time;
+	}
+
 	Crime(int id, const std::string place, TAKE_TIME)
 	{
 		set_width();
 		set_id(id);
-		set_plase(place);
+		set_place(place);
 		set_time(GIVE_TIME);
 	}
 
 	~Crime() {}
 
+	Crime& operator()(std::string crime)
+	{
+		id = stoi(crime, 0, 10);			//перобразуем первое число в строке и преобразуем его в id
+		while (crime.front() == ' ')crime.erase(0, 1);
+		crime.erase(0, crime.find(' '));	//удаляем сохраненное число из строки
+
+		set_time(stoi(crime, 0, 10));		//читаем timestamp из строки
+		crime.erase(0, 1);					//удаляем пробел с начала строки
+		crime.erase(0, crime.find(' '));	//удаляем timestamp из строки
+		while (crime.front() == ' ')crime.erase(0, 1);
+		set_place(crime);
+		return *this;
+	}
 };
 
 int Crime::width = 1;
+
 
 std::ostream& operator<<(std::ostream& os, const Crime& obj)
 {
@@ -133,6 +153,19 @@ std::ostream& operator<<(std::ostream& os, const Crime& obj)
 	os << crime.at(obj.get_id());
 	os << obj.get_place();
 	return os;
+}
+
+std::ifstream& operator>>(std::ifstream& is, Crime& obj)
+{
+	int id;
+	time_t datetime;
+	std::string place;
+	is >> id >> datetime;
+	std::getline(is, place, ',');
+	obj.set_id(id);
+	obj.set_time(datetime);
+	obj.set_place(place);
+	return is;
 }
 
 void print(const std::map<std::string, std::list<Crime>>& base)
@@ -213,12 +246,47 @@ void save(const std::map<std::string, std::list<Crime>>& base, const std::string
 			//fout.seekp(-3, ios::cur);
 			fout << " " << c_it->get_place() << ", ";
 		}
+		fout.seekp(-2, std::ios::cur);
 		fout << endl;
 	}
 	fout.close();
 	std::string command = "notepad ";
 	command += filename;
 	system(command.c_str());
+}
+
+void load(std::map<std::string, std::list<Crime>>& base, const std::string& filename)
+{
+	base.clear();
+	std::ifstream fin(filename);
+	if (fin.is_open())
+	{
+		std::string licence_plate;
+		const int SIZE = 1024;
+		char all_crime[SIZE] = {};
+		Crime crime(0, "", 1	, 1, 1, 1, 1971);
+		while (!fin.eof())
+		{
+			std::getline(fin, licence_plate, ':');
+			if (licence_plate.empty())continue;
+			//while (crime.get_place().back() != ';')
+			//{
+			//	fin >> crime;
+			//}
+			fin.getline(all_crime, SIZE, ';');
+			for (char* pch = strtok(all_crime, ",;"); pch; pch = strtok(NULL, ";"))
+			{
+				crime(pch);
+				base[licence_plate].push_back(crime);
+			}
+		}
+		fin.ignore();
+		fin.close();
+	}
+	else
+	{
+		std::cerr << "File not found" << endl;
+	}
 }
 
 //#define CRIME_CHECK
@@ -240,7 +308,7 @@ void main()
 	cout << "Текущее время в формате 'tm' \t    :" << asctime(p_tm_curren_time) << endl;
 #endif // TIME_CHECK
 
-	std::map<std::string, std::list<Crime>> base =
+	std::map<std::string, std::list<Crime>> base;/*=
 	{
 		{"m777aa",
 			{
@@ -263,7 +331,7 @@ void main()
 				Crime(3, "ул. Октябрьская", 22, 18, 11, 4, 2022)
 			}
 		}
-	};
+	};*/
 
 	int key;
 	do
@@ -282,6 +350,7 @@ void main()
 		{
 		case 1: print(base); break;
 		case 2: save(base, "base.txt"); break;
+		case 3:load(base, "base.txt"); break;
 		case 4: add_crime(base); break;
 		case 5: print_number(base); break;
 		case 6: print_range(base); break;
